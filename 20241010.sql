@@ -1,0 +1,193 @@
+-- 학생 테이블 생성(학번, 이름, 학과명, 평점)
+CREATE TABLE STUDENT(
+	STD_NO CHAR(8), -- 항목명 타입(바이트) - CHAR : 고정길이 문자열 (바이트) 
+	STD_NAME VARCHAR2(50), --VARCHAR2 : 가변(저장되는 공간이 바뀐다)길이 문자열
+	MAJOR_NAME VARCHAR2(50),
+	STD_SCORE NUMBER(3,2) -- 숫자타입 3자리, 소수점 2자리까지 표시
+);
+
+-- 데이터 추가방법
+INSERT INTO STUDENT(STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE) VALUES('20201111','홍길동','컴퓨터공학과',3.24);
+
+-- 학생 테이블의 데이터를 전체 조회
+SELECT * FROM STUDENT;
+
+-- 특정 컬럼 데이터 조회
+SELECT STD_NO, STD_NAME FROM STUDENT;
+
+
+-- DDL(Data Definition Language : 데이터 정의어)
+--		Database의 개체 및 구성요소(스키마)를 정의, 변경, 삭제하는데 사용됨(스키마 : )
+/*		CREATE : 데이터베이스 구성 요소를 생성(테이블, 인덱스, 시퀸스, 사용자....)
+ * 		ALTER : 생성된 데이터베이스 구성요소를 변경할 때 사용
+ * 		DROP : 생성된 데이터베이스 구성요소를 삭제할 때 사용
+ * 		TRUNCATE : 테이블에 있는 모든 데이터를 빠르게 삭제하고, 공간을 해제, 구조는 유지함
+ * */
+
+-- 테이블 생성하는 방법
+/*
+CREATE TABLE 테이블_이름(
+	컬럼명1 데이터타입 [NULL | NOT NULL], -- NULL : 값을 안넣어도 된다, NOT NULL : 값을 무조건 넣어야 한다.
+	컬럼명2 데이터타입 DEFAULT 기본값, -- 기본값으로 넣어 준다
+	컬럼명3 데이터타입 [NULL | NOT NULL],
+	컬럼명4 데이터타입 PRIMARY KEY,
+	....,
+	CONSTRAINT 제약조건이름 PRIMARY KEY(컬럼명) -- PRIMARY KEY(기본키) :  각행을 고유하게 식별하는 필수적인 열 또는 열의 집합 / NULL 불가
+	
+);
+*/
+-- 데이터 타입
+-- 문자열 : CHAR(2000바이트까지 지원) / VARCHAR2(4000바이트) / CLOB(128TB)
+-- 숫자 : NUMBER(자리수, 소수점개수) -> 최대 38자리 / FLOAT(소수 128자리)
+-- 날짜 및 시간 : DATE(날짜 / 시간) / TIMESTAMP(정밀한 날짜/시간) -> 초의 소수점 아래 값까지 포함 최대 9자리
+
+-- PERSON TABLE 만들기
+-- PNAME -> VARCHAR2(30)
+-- PAGE -> NUMBER(3)
+CREATE TABLE PERSON(
+	PNAME VARCHAR2(30),
+	PAGE NUMBER(3,0)
+);
+
+-- 데이터 5건 넣는 SQL문
+INSERT INTO PERSON (PNAME,PAGE) VALUES('John',25);
+INSERT INTO PERSON (PNAME,PAGE) VALUES('Emma',35);
+INSERT INTO PERSON (PNAME,PAGE) VALUES('홍길동',999);
+INSERT INTO PERSON (PNAME,PAGE) VALUES('김철수',50);
+INSERT INTO PERSON (PNAME,PAGE) VALUES('마지막',666);
+-- 테이블에 모든 컬럼에 데이터 저장, 테이블 생성시 작성한 컬럼 순서대로 데이터 작성
+INSERT INTO PERSON VALUES('찐막',111);
+
+-- PERSON 테이블에 있는 모든 데이터를 조회
+SELECT * FROM PERSON;
+
+SELECT PNAME FROM PERSON;
+
+-- 나이가 4자리인 PERSON 데이터 추가 (에러 생성)
+INSERT INTO PERSON (PNAME,PAGE) VALUES('에러생성',9999);
+-- SQL Error [1438] [22003]: ORA-01438: 이 열에 대해 지정된 전체 자릿수보다 큰 값이 허용됩니다.
+
+-- PERSON TABLE 삭제 구문 --> 삭제시 모든 데이터가 날아간다.
+DROP TABLE PERSON;
+
+-- DEFAULT(기본값) 추가
+CREATE TABLE PERSON(
+	PNAME VARCHAR2(30),
+	PAGE NUMBER(3,0) DEFAULT 30
+);
+
+INSERT INTO PERSON (PNAME,PAGE) VALUES('John', NULL); -- NULL을 넣어도 기본값이 들어가진 않는다.
+INSERT INTO PERSON (PNAME) VALUES('Emma'); -- 기본값 적용 해보기
+
+SELECT * FROM PERSON; -- Emma의 나이가 기본값으로 30이 들어감
+
+-- PERSON 테이블 데이터 삭제
+TRUNCATE TABLE PERSON;
+SELECT * FROM PERSON;
+
+-- 기존 만들었던 STUDENT TABLE 삭제
+DROP TABLE STUDENT;
+
+-- 학생 테이블 생성 (제약조건 추가)
+-- 학번, 이름, 학과명, 평점
+CREATE TABLE STUDENT(
+	STD_NO CHAR(8) PRIMARY KEY, -- 기본키 설정
+	STD_NAME VARCHAR2(30) NOT NULL, -- 반드시 데이터 입력 하여야한다
+	MAJOR_NAME VARCHAR2(30),
+	STD_SCORE NUMBER(3,2) DEFAULT 0 NOT NULL -- 기본값 0 지정 NULL입력 방지
+);
+
+-- STUDENT 데이터 5건 저장
+INSERT INTO STUDENT(STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE) VALUES('20201111','김철수','법학과',4.5);
+INSERT INTO STUDENT VALUES('20200302', '홍길동', '컴퓨터공학', 4.1);
+INSERT INTO STUDENT VALUES('20214233', '아몰라', '외국어', 3.5);
+INSERT INTO STUDENT VALUES('20233333', '힘들어', '그만하자', 2.43);
+INSERT INTO STUDENT VALUES('20223213', '아무나', '개많네', 2.3);
+
+-- 제약조건 확인
+INSERT INTO STUDENT(STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE) VALUES('','학번','기본키',3); -- 학번 기본키(PRIMARY KEY) 에러
+INSERT INTO STUDENT(STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE) VALUES('20201155','','이름',4.5); -- 이름 NOT NULL 에러
+INSERT INTO STUDENT(STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE) VALUES('20201231','평점','DEFALULT',NULL); --평점 기본값 0지정 NULL은 넣지 못함
+
+-- GPT 샘플데이터
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024001', 'John Doe', 'Computer Science', 4.2);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024002', 'Jane Smith', 'Electrical Engineering', 3.8);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024003', 'Michael Johnson', 'Mechanical Engineering', 3.5);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024004', 'Emily Davis', 'Biology', 4.0);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024005', 'David Lee', 'Mathematics', 3.9);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024006', 'Sophia Kim', 'Physics', 3.7);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024007', 'Chris Brown', 'Chemistry', 3.6);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024008', 'Anna Martinez', 'English Literature', 4.3);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024009', 'James Wilson', 'History', 3.4);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('S2024010', 'Mia Hernandez', 'Psychology', 4.1);
+
+INSERT INTO STUDENT (STD_NO, STD_NAME, MAJOR_NAME, STD_SCORE)
+VALUES ('2024000', '이영수', '물리학', 2.9);
+
+-- STUDENT TABLE 전체 조회
+SELECT * FROM STUDENT;
+SELECT * FROM STUDENT ORDER BY STD_NAME DESC; -- DESC 내림차순 조회
+SELECT * FROM STUDENT ORDER BY STD_NAME ASC; -- ASC 오름차순
+
+-- 학생 데이터 검색 조건
+SELECT * FROM STUDENT WHERE STD_SCORE > 3.0; -- 평점 3점 이상만 조회
+SELECT * FROM STUDENT WHERE STD_NO = '20230001'; -- 학번 20230001 조회
+SELECT * FROM STUDENT WHERE STD_NO = '2024000'; -- 학번 2024000 조회
+SELECT * FROM STUDENT WHERE STD_NO LIKE '2024000'; -- 학번 2024000 조회 LIKE
+
+-- ALTER 컬럼 추가 ADD
+ALTER TABLE STUDENT ADD STD_GENDER NUMBER(1) DEFAULT 0 NOT NULL;
+
+-- 테이블 컬럼을 변경 MODIFY
+ALTER TABLE STUDENT MODIFY STD_GENDER CHAR(1) DEFAULT 'M' NOT NULL; -- NUMBER 타입에서 이미 데이터가 들어가 있으면 CHAR로 변경 할 수 없다.
+ALTER TABLE STUDENT MODIFY STD_NAME VARCHAR(50);
+
+-- 컬럼 삭제 DROP
+ALTER TABLE STUDENT DROP COLUMN STD_GENDER;
+
+-- 컬럼 이름 변경
+ALTER TABLE STUDENT RENAME COLUMN STD_NAME TO STD_NEW_NAME;
+
+-- 테이블 이름 변경
+ALTER TABLE STUDENT RENAME TO NEW_STUDENT;
+
+SELECT * FROM STUDENT;
+
+UPDATE STUDENT SET STD_NAME = '변경함' WHERE STD_NO = '20230001';
+
+-- 날짜 컬럼 추가 및 데이터 추가
+ALTER TABLE PERSON ADD BIRTH DATE;
+SELECT * FROM PERSON;
+
+INSERT INTO PERSON (PNAME, PAGE, BIRTH) VALUES ('박명운', 22, '1999-04-29');
+
+INSERT INTO PERSON VALUES ('박명수', 25, '1994/01/25');
+
+INSERT INTO PERSON VALUES ('김창숙', 44, '99/04/24');
+
+INSERT INTO PERSON VALUES ('장정보', 55, SYSDATE);
+
+--현재 날짜 시간 확인 방법
+SELECT SYSDATE FROM DUAL;
+
+DROP TABLE PERSON ;
+SELECT * FROM PERSON;
