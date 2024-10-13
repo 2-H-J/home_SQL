@@ -86,7 +86,7 @@ SELECT MAJOR_NAME FROM STUDENT;
 SELECT DISTINCT MAJOR_NAME FROM STUDENT; -- DISTINCT : 중복제거
 
 -- 조건절
--- 관계연산자 : > , < , >= , <= , = , <>
+-- 관계연산자 : > , < , >= , <= , = , <> 
 -- 논리연산자 : NOT , AND , OR
 
 -- PERSON 테이블에서 나이가 30 이상인 사람만 조회
