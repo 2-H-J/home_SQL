@@ -28,7 +28,7 @@ CREATE TABLE PERSON(
 
 --PERSON 테이블에 데이터 추가
 INSERT INTO PERSON VALUES('홍길동', 20);
-INSERT INTO PERSON(PNAME, PAGE) VALUES('이순신', 30);
+INSERT INTO PERSON(PNAME, PAGE) VALUES('이형준', NULL);
 
 --PERSON 데이터 5건 추가
 INSERT ALL 
@@ -124,7 +124,7 @@ WHERE EMP_COURSE_DATE BETWEEN '2023/01/01' AND '2023/01/03';
 --UPDATE 테이블명 SET 수정할컬럼명=수정할값,.... WHERE 조건절
 -- + - * / 
 -- PERSON 테이블의 데이터 중 20세 미만인 데이터는 나이를 99로 수정
-UPDATE PERSON SET PAGE=99 WHERE PAGE < 30;
+UPDATE PERSON SET PAGE=99 WHERE PAGE < 20;
 SELECT * FROM PERSON;
 -- PERSON 테이블의 데이터 중 30세 미만인 데이터에 나이를 현재 값에 5씩 빼서 저장
 UPDATE PERSON SET PAGE = PAGE - 5 WHERE PAGE < 30;
@@ -155,3 +155,48 @@ DROP TABLE CAR;
 -- 자동차테이블에서 제조사가 BMW인 자동차를 조회
 SELECT ROWNUM, C.* FROM CAR C WHERE CAR_MAKER LIKE 'BMW'; -- 테이블 옆 C는 테이블명의 별칭
 -- ROWNUM : ROW(행)번호
+
+-- 정렬 : ORDER BY 컬럼명 [ASC | DESC], 컬럼명 [ASC | DESC];
+SELECT C.* FROM CAR c WHERE CAR_MAKER LIKE 'BMW' ORDER BY CAR_PRICE;
+SELECT C.* FROM CAR c WHERE CAR_MAKER LIKE 'BMW' 
+ORDER BY CAR_PRICE DESC; -- DESC : 내림차순(높은순)
+
+SELECT C.* FROM CAR c WHERE CAR_MAKER LIKE 'BMW' 
+ORDER BY CAR_MAKE_YEAR DESC, CAR_PRICE DESC; -- DESC : 내림차순 / 우선순위로는 연도가 높은거 부터
+
+SELECT ROWNUM, C.* FROM CAR C WHERE CAR_MAKER LIKE 'BMW'
+ORDER BY CAR_MAKE_YEAR DESC, CAR_PRICE DESC;
+-- 실행 순서 : FROM -> WHERE -> SELECT -> ORDER BY
+
+
+-- 자동차 데이터 TOP 10건 출력 ROWNUM 활용
+SELECT C.* FROM CAR C WHERE ROWNUM <= 10 ORDER BY CAR_PRICE DESC;
+
+-- 자동차 테이블에서 제조사가 BMW이거나 Mercedes-Benz, Audi인 자동차 조회
+SELECT C.* FROM CAR C WHERE CAR_MAKER IN ('BMW','Mercedes-Benz','Audi');
+SELECT C.* FROM CAR c WHERE CAR_MAKER LIKE 'BMW' OR CAR_MAKER LIKE 'Mercedes-Benz' OR CAR_MAKER LIKE 'Audi';
+
+-- 자동차 테이블에서자동차 금액이 7000이상 9000이하 자동차를 조회
+SELECT C.* FROM CAR c WHERE CAR_PRICE BETWEEN 7000 AND 9000;
+SELECT C.* FROM CAR c WHERE CAR_PRICE >= 7000 AND CAR_PRICE <= 9000 ORDER BY CAR_PRICE ASC;
+
+-- 자동차 테이블에서 제조사가 Kia이면서 자동차 금액이 70000이상 90000이하인 자동차 조회
+SELECT C.* FROM CAR c WHERE CAR_PRICE BETWEEN 70000 AND 90000 AND CAR_MAKER LIKE 'Kia';
+
+-- 자동차 테이블에서 자동차 번호가 3번째 자리가 8, 4번째자리가 9인 자동차를 조회
+--SUBSTR : 함수는 문자열에서 특정 위치부터 지정된 길이만큼의 문자열을 추출하는 데 사용되는 함수
+SELECT C.* FROM CAR c WHERE SUBSTR (CAR_ID, 3, 1) = '8' AND SUBSTR(CAR_ID, 4, 1) = '9'; 
+
+SELECT  C.* FROM CAR c WHERE CAR_ID LIKE '__89______';
+SELECT  C.* FROM CAR c WHERE CAR_ID LIKE '__89%'; -- %뒤에 수는 상관없음
+
+-- 자동차 테이블에서 금액이 10000넘는 자동차의 금액을 3000씩 금액을 낮추세요
+SELECT C.* FROM CAR c ;
+UPDATE CAR SET CAR_PRICE = CAR_PRICE - 3000 WHERE CAR_PRICE >= 10000;
+
+-- 자동차 테이블에서 자동차 금액을 전부 30% 할인한 금액으로 낮추세요
+UPDATE CAR SET CAR_PRICE = CAR_PRICE * 0.7;
+
+-- 자동차 테이블에서 제조사가 Jeep인 데이터를 삭제
+DELETE FROM CAR WHERE CAR_MAKER = 'Jeep';
+SELECT CAR_MAKER FROM CAR WHERE CAR_MAKER ='Jeep';
