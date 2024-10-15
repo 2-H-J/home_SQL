@@ -1,9 +1,9 @@
 -- 학생 테이블 생성(학번, 이름, 학과명, 평점)
 CREATE TABLE STUDENT(
-	STD_NO CHAR(8), -- 항목명 타입(바이트) - CHAR : 고정길이 문자열 (바이트) 
-	STD_NAME VARCHAR2(50), --VARCHAR2 : 가변(저장되는 공간이 바뀐다)길이 문자열
+	STD_NO CHAR(8) PRIMARY KEY, -- 항목명 타입(바이트) - CHAR : 고정길이 문자열 (바이트) 
+	STD_NAME VARCHAR2(50) NOT NULL, --VARCHAR2 : 가변(저장되는 공간이 바뀐다)길이 문자열
 	MAJOR_NAME VARCHAR2(50),
-	STD_SCORE NUMBER(3,2) -- 숫자타입 3자리, 소수점 2자리까지 표시
+	STD_SCORE NUMBER(3,2) DEFAULT 0 NOT NULL -- 숫자타입 3자리, 소수점 2자리까지 표시
 );
 
 -- 데이터 추가방법
