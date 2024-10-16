@@ -1,0 +1,114 @@
+--(조인)JOIN
+
+CREATE TABLE A(
+    CODE CHAR(1),
+    VAL NUMBER(1)
+);
+CREATE TABLE B(
+    CODE CHAR(1),
+    UNIT CHAR(1)
+);
+INSERT INTO A VALUES('A',1);
+INSERT INTO A VALUES('B',2);
+INSERT INTO A VALUES('C',3);
+INSERT INTO A VALUES('D',4);
+
+INSERT INTO B VALUES('A','+');
+INSERT INTO B VALUES('B','-');
+INSERT INTO B VALUES('C','*');
+INSERT INTO B VALUES('F','/');
+
+SELECT * FROM A;
+
+SELECT * FROM B;
+
+--동일 조인(INNER JOIN) : 두 테이블에서 공통된 값이 있는 행만 반환. 즉, 두 테이블의 조건이 일치하는 행들만 결과로 반환됩니다.
+--1.
+SELECT 
+	A.CODE, A.VAL,
+	B.CODE, B.UNIT
+FROM A, B
+WHERE A.CODE = B.CODE;
+
+--2.
+SELECT 
+	A.CODE, A.VAL,
+	B.CODE, B.UNIT
+FROM A 
+INNER JOIN B 
+ON A.CODE = B.CODE;
+
+--3.
+SELECT 
+	A.CODE, A.VAL,
+	B.CODE, B.UNIT
+FROM A 
+JOIN B 
+ON A.CODE = B.CODE;
+
+------------------------
+-- 자연조인(NATURAL JOIN) : 두 테이블 간에 동일한 이름을 가진 컬럼을 자동으로 기준으로 하여 조인을 수행, 이때 명시적으로 ON 조건을 제공하지 않아도 됨
+-- 자동으로 똑같은 컬럼을 찾아 조인하고 중복된 컬럼(예시-A.CODE, B.CODE)을 제거해서 조회
+SELECT 
+	*
+FROM A NATURAL JOIN B;
+
+-- 교차조인(CROSS JOIN) : 두 테이블 간의 카티션 곱을 계산. 즉, 두 테이블의 모든 행을 서로 조합한 결과를 반환,
+--						  일반적으로 매우 큰 결과가 생성될 수 있어 신중하게 사용해야 합니다.
+-- 두 테이블의 모든 조합을 조회
+SELECT 
+	*
+FROM A CROSS JOIN B;
+
+-------------------------
+
+--학생 테이블에 학과명만 중복없이 조회
+SELECT DISTINCT STD_MAJOR 
+FROM STUDENT;
+
+--학과명, 행번호
+-- 서브 쿼리 적용
+SELECT ROW_NUMBER() OVER(ORDER BY STD_MAJOR) AS RW, STD_MAJOR 
+FROM (SELECT DISTINCT STD_MAJOR FROM STUDENT);
+
+SELECT 
+	TO_CHAR(ROWNUM, 'FM00') AS MAJOR_NO,
+	STD_MAJOR AS MAJOR_NAME
+FROM (SELECT DISTINCT STD_MAJOR FROM STUDENT);
+
+--새롭게 테이블 만들기 방법
+CREATE TABLE MAJOR
+AS
+SELECT 
+	TO_CHAR(ROWNUM, 'FM00') AS MAJOR_NO,
+	STD_MAJOR AS MAJOR_NAME
+FROM (SELECT DISTINCT STD_MAJOR FROM STUDENT);
+
+SELECT * FROM MAJOR;
+SELECT * FROM STUDENT;
+--학생 테이블에 MAJOR_NO 컬럼을 추가
+ALTER TABLE STUDENT ADD MAJOR_NO VARCHAR2(3);
+
+--학생 테이블에 학과 번호 업데이트
+UPDATE STUDENT
+SET MAJOR_NO = (SELECT MAJOR_NO FROM MAJOR WHERE MAJOR_NAME = STD_MAJOR);
+
+SELECT * FROM STUDENT;
+
+-- 학생 테이블에서 학과명 컬럼
+ALTER TABLE STUDENT DROP COLUMN MAJOR_NAME;
+
+-- 학생 정보 조회시
+-- 학번 이름 학과명 평점 조회
+SELECT 
+	S.STD_NO ,
+	S.STD_NAME,
+	M.MAJOR_NAME ,
+	S.STD_SCORE 
+FROM STUDENT S
+JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO;
+
+-- NATURAL JOIN
+SELECT 
+	*
+FROM STUDENT S NATURAL JOIN MAJOR M;

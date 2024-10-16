@@ -313,6 +313,8 @@ SELECT
 FROM EMPLOYEE
 GROUP BY GROUPING SETS (EMP_DEPARTMENT , EMP_POSITION, ());
 
+
+----------------------------------------------------------------------------------
 --CAR 테이블
 --제조사별, 연도별, 차량 개수, 차량 평균 금액
 SELECT 
@@ -340,4 +342,5 @@ SELECT
 	COUNT(*) AS "개수",
 	TRUNC(AVG(CAR_PRICE)) AS "평균 금액" 
 FROM CAR
-GROUP BY CUBE (CAR_MAKER , CAR_MAKE_YEAR); 
+GROUP BY CUBE (CAR_MAKER , CAR_MAKE_YEAR);
+
