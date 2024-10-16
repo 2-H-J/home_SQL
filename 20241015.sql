@@ -222,7 +222,10 @@ SELECT DENSE_RANK() OVER(ORDER BY PAGE) AS RANK, P.* FROM PERSON P;
 SELECT DENSE_RANK() OVER(ORDER BY PAGE DESC) AS RANK, P.* FROM PERSON P;
 
 -- ROW_NUMBER() : 줄번호
-SELECT ROW_NUMBER() OVER(ORDER BY PAGE) AS RW, P.* FROM PERSON P;
+SELECT 
+	ROW_NUMBER() OVER(ORDER BY PAGE) AS RW,
+	P.* 
+FROM PERSON P;
 SELECT ROW_NUMBER() OVER(ORDER BY PAGE DESC) AS RW, P.* FROM PERSON P;
 
 SELECT
@@ -261,7 +264,26 @@ SELECT
 	DENSE_RANK() OVER(PARTITION BY S.MAJOR_NAME ORDER BY S.STD_SCORE DESC) AS RANK, S.*
 FROM STUDENT S;
 
------------------------
+------------------------------------------------------------------------------------------------------------
+
+--NULL 값 처리하는 함수 ( 중요 )
+--NVL(첫번째값, 리턴값) : 1번째 값이 NULL일때 2번째 값을 리턴, NULL이 아니면 그냥 1번째 값을 리턴
+SELECT NVL(NULL, 'NULL값'), NVL('100','NULL값') FROM DUAL;
+
+--NVL2(값, 널이 아니면 리턴 하는 값, 널이면 리턴 하는 값) : 1번째 값이 널이면 3번째 값을 리턴하고 널이 아니면 2번째 값을 리턴 한다.
+SELECT 
+	NVL2(NULL,'널이 아닐때 값','널일때 값'),
+	NVL2('100','널이 아닐때 값', '널일때 값')
+FROM DUAL;
+
+--DECODE : 1번째 값이 ~일때, ~를 리턴 하는 함수 가장 마지막 값은 default값(1번째 값이 없으면 나올 값) (Java의 swich문과 비슷)
+--값을 숫자로만 지원함, default값은 끝에 넣어야 한다.
+SELECT DECODE(1,1,'A',2,'B','C') FROM DUAL;
+SELECT DECODE(2,1,'A',2,'B','C') FROM DUAL;
+SELECT DECODE(5,1,'A',5,'B','C') FROM DUAL;
+SELECT DECODE(4,1,'A',2,'B',3,'C',4,'D','F') FROM DUAL;
+
+------------------------------------------------------------------------------------------------------------
 -- 학생 테이블에서 학생정보 조회시
 -- 학번의 경우 앞에서 4자리만 표현하고 나머지 4자리는 마스킹 처리 해서 조회
 SELECT SUBSTR(STD_NO,1,4) || '****',
@@ -303,6 +325,6 @@ FROM STUDENT s;
 
 -- 학번 앞 4자리와 학과명 으로 분류, 평점으로 랭킹순위
 SELECT 
-	DENSE_RANK() OVER(PARTITION BY SUBSTR(S.STD_NO, 1, 4) 
-	,MAJOR_NAME ORDER BY S.STD_SCORE DESC) AS SCORE_RANK , S.*
+	DENSE_RANK() OVER(PARTITION BY SUBSTR(S.STD_NO, 1, 4) ,MAJOR_NAME 
+	ORDER BY S.STD_SCORE DESC) AS SCORE_RANK , S.*
 FROM STUDENT s;

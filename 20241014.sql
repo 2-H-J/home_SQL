@@ -36,58 +36,84 @@ CREATE TABLE PRODUCTS (
 SELECT * FROM PRODUCTS;
 DROP TABLE PRODUCTS;
 
---------------------------------------------------------------------------------------------
+SELECT
+	INSTR(P.PRODUCT_NAME,'갤럭시') AS "INSTR갤럭시", 
+	M.*, P.*
+FROM MANUFACTURERS M, PRODUCTS P;
 
--- PERSON 샘플 50건 CSV로 추가함
-SELECT * FROM PERSON;
+/*
+1. 문제 1: 제조사별 제품 목록을 가격순으로 조회
+각 제조사별로 제품명과 가격을 가격순으로 정렬하여 조회하세요.
+가격이 50만 원 이상인 제품만 조회합니다. 
+출력할 컬럼: 제조사명, 제품명, 가격
+*/
+SELECT 
+    RANK() OVER(PARTITION BY M.MANUFACTURER_NAME 
+    ORDER BY P.PRICE DESC) AS "분류",
+    M.MANUFACTURER_NAME AS "제조사",
+    P.PRODUCT_NAME AS "제품",
+    P.PRICE AS "가격"
+FROM MANUFACTURERS M
+JOIN PRODUCTS P ON M.MANUFACTURER_ID = P.MANUFACTURER_ID
+WHERE P.PRICE >= 500000
+ORDER BY M.MANUFACTURER_NAME, P.PRICE DESC;
 
---윈도우 함수 (Window Functions) : 윈도우 함수는 그룹화하지 않고도 결과 집합에 대해 순차적으로 계산할 수 있는 함수
---OVER, PARTITION BY, ORDER BY
+-- GPT
+SELECT 
+    M.MANUFACTURER_NAME AS "제조사", 
+    P.PRODUCT_NAME AS "제품", 
+    P.PRICE AS "가격"
+FROM MANUFACTURERS M
+JOIN PRODUCTS P ON M.MANUFACTURER_ID = P.MANUFACTURER_ID
+WHERE P.PRICE >= 500000
+ORDER BY P.PRICE DESC;
 
---순위 RANK() : 순위를 체크 동일한 값이 있으면 다음 순위는 건너뛴다
-SELECT RANK() OVER(ORDER BY PAGE) AS RANK, P.* FROM PERSON P; -- ORDER BY PAGE : 기본 정렬은 ASC 올림차순으로 적용 되어 있다.
-SELECT RANK() OVER(ORDER BY PAGE DESC) AS RANK, P.* FROM PERSON P;
 
--- DENSE_RANK() : 동일한 값이 같은 랭크 후 이어서 랭크순위를 반환
-SELECT DENSE_RANK() OVER(ORDER BY PAGE) AS RANK, P.* FROM PERSON P; 
-SELECT DENSE_RANK() OVER(ORDER BY PAGE DESC) AS RANK, P.* FROM PERSON P;
+/*
+2. 문제 2: 제품 가격에 따른 순위 부여
+제품 가격을 기준으로 순위를 매기고, 해당 제품의 순위와 함께 출력하세요.
+출력할 컬럼: 제품명, 가격, 순위
+힌트:
+윈도우 함수인 RANK() 또는 ROW_NUMBER()를 활용하여 순위를 부여하세요. 
+*/
+-- GPT도 동일
+SELECT
+	P.PRODUCT_NAME,
+	P.PRICE,
+	ROW_NUMBER() OVER(ORDER BY P.PRICE DESC) AS "순위"
+FROM PRODUCTS P;
 
--- ROW_NUMBER() : 줄번호
-SELECT ROW_NUMBER() OVER(ORDER BY PAGE) AS RW, P.* FROM PERSON P;
-SELECT ROW_NUMBER() OVER(ORDER BY PAGE DESC) AS RW, P.* FROM PERSON P;
+/*
+3. 문제 3: 제품명에 특정 문자열이 포함된 제품 조회
+제품명에 '갤럭시'라는 단어가 포함된 제품을 조회하세요.
+출력할 컬럼: 제품명, 가격, 제조사명 
+ */
+
+SELECT * FROM MANUFACTURERS m ;
+SELECT P.PRODUCT_NAME,
+	P.PRICE,
+	M.MANUFACTURER_NAME FROM PRODUCTS p
+INNER JOIN  MANUFACTURERS m
+on p.MANUFACTURER_ID =m.MANUFACTURER_ID
+WHERE p.PRODUCT_NAME LIKE '%갤럭시%';
+
+SELECT * FROM USER_TABLES;
+
+
 
 SELECT
-	ROW_NUMBER() OVER(ORDER BY PAGE) AS RW,
-	RANK() OVER(ORDER BY PAGE) AS RANK,
-P.* FROM PERSON P;
+	P.PRODUCT_NAME,
+	P.PRICE,
+	M.MANUFACTURER_NAME
+FROM PRODUCTS P
+JOIN MANUFACTURERS M ON P.MANUFACTURER_ID = M.MANUFACTURER_ID
+WHERE INSTR(P.PRODUCT_NAME, '갤럭시') > 0;
 
---------------------------------------------------------------------------------------------
+-- 학생 테이블에서 성씨별로 점수 순위를 내림 차순 기준으로 조회하시오
+-- 출력 형태는 아래와 같이 조회하세요 순위는 건너뛰지 않습니다.
+-- 순위 학번 성씨 학과명 평점
 
--- LEAD(): 현재 행 이후의 값을 반환.
--- 현재 행을 기준으로 다음 위치에 해당하는 값을 읽어오는 함수
-SELECT P.*, 
-	LEAD(PNAME) OVER(ORDER BY PAGE) AS NEXT_PNAME -- LEAD(현재 행 이후 값)
-FROM PERSON P;
+SELECT std_name,count(*) FROM STUDENT s
+GROUP BY std_name
+ORDER BY std_name DESC ;
 
-SELECT P.*, 
-	LEAD(PNAME, 2, '데이터 없음') OVER(ORDER BY PAGE) AS NEXT_PNAME -- LEAD(현재 행, 현재 행 지정한 이후 값, 값이 없을때 나옴)
-FROM PERSON P;
-
--- 현재 행을 기준으로 이전 위치에 해당하는 값을 읽어오는 함수
-SELECT P.*, 
-	LAG(PNAME) OVER(ORDER BY PAGE) AS PREV_PNAME -- LAG(현재 행 이전 값)
-FROM PERSON P;
-
-SELECT P.*, 
-	LAG(PNAME, 2, '데이터 없음') OVER(ORDER BY PAGE) AS PREV_PNAME -- LAG(현재 행, 현재 행 지정한 이전 값, 값이 없을때 나옴)
-FROM PERSON P;
-
--- 학생테이블의 평점을 기준으로 성적 순위를 출력, 성적순은 내림차순으로 처리, 순위는 건너뛰지 않는다
-SELECT  
-	DENSE_RANK() OVER(ORDER BY S.STD_SCORE DESC) AS RANK, S.*
-FROM STUDENT S;
-
---PARTITION BY 파티션으로 나눌 변수명 : 파티션별 나눠서 순위를 줄 수 있다.
-SELECT  
-	DENSE_RANK() OVER(PARTITION BY S.MAJOR_NAME ORDER BY S.STD_SCORE DESC) AS RANK, S.*
-FROM STUDENT S;
