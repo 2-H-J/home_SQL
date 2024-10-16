@@ -268,7 +268,7 @@ FROM STUDENT S;
 
 --NULL 값 처리하는 함수 ( 중요 )
 --NVL(첫번째값, 리턴값) : 1번째 값이 NULL일때 2번째 값을 리턴, NULL이 아니면 그냥 1번째 값을 리턴
-SELECT NVL(NULL, 'NULL값'), NVL('100','NULL값') FROM DUAL;
+SELECT NVL(NULL, 'NULL일때 값'), NVL('100','NULL값') FROM DUAL;
 
 --NVL2(값, 널이 아니면 리턴 하는 값, 널이면 리턴 하는 값) : 1번째 값이 널이면 3번째 값을 리턴하고 널이 아니면 2번째 값을 리턴 한다.
 SELECT 
