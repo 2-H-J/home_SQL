@@ -1,4 +1,27 @@
+/*문제 1: 문자열 함수 활용하기
+다음 SQL 쿼리를 작성하세요:
+
+**학생 테이블(STUDENT)**에서 학생들의 이름이 '김'으로 시작하는 학생들의 학번과 이름을 조회하세요.
+조회한 학생들의 이름을 모두 소문자로 변환하여 출력하세요. 단, 한글 이름은 변환되지 않고, 영어 이름이 소문자로 변환됩니다.*/
+
+SELECT STD_NO ,LOWER(STD_NAME) 
+FROM STUDENT 
+WHERE SUBSTR(STD_NAME, 1,1) = '김' ;
+
+/*문제 2: 숫자 계산 함수 활용하기
+다음 SQL 쿼리를 작성하세요:
+
+EMPLOYEE 테이블에서 각 사원의 연봉을 천단위 구분 기호를 추가하여 조회하세요.
+연봉이 5000만 원 이하인 사원의 사원 번호와 연봉을 조회하세요.*/
+
+SELECT * FROM EMPLOYEE WHERE EMP_SALARY < 50000000;
+-- , : 단위 구분 (천단위 등등) 기호,  . : 소수점 기호 - ,랑 .을 같이 사용 하여야 함
+SELECT TO_CHAR(1234567.89,'L99,999,999.000') FROM DUAL;
+
 --(조인)JOIN
+-- 여러개의 테이블에서 필요한 데이터를 조회하기 위해
+-- 테이블 결합해서 조회하기 위한 연산
+-- 결합(JOIN)을 하려면 테이블끼리 연결 될 수 있는 동일한 데이터를 가지고 있는 컬럼이 있어야 됨
 
 CREATE TABLE A(
     CODE CHAR(1),
@@ -22,7 +45,9 @@ SELECT * FROM A;
 
 SELECT * FROM B;
 
---동일 조인(INNER JOIN) : 두 테이블에서 공통된 값이 있는 행만 반환. 즉, 두 테이블의 조건이 일치하는 행들만 결과로 반환됩니다.
+--동일 조인 : 두 테이블에서 공통된 값이 있는 행만 반환. 즉, 두 테이블의 조건이 일치하는 행들만 결과로 반환됩니다.
+-- 같은 값을 기준으로 결합
+
 --1.
 SELECT 
 	A.CODE, A.VAL,
@@ -31,12 +56,14 @@ FROM A, B
 WHERE A.CODE = B.CODE;
 
 --2.
+--INNER JOIN
+--조인 조건을 만족하는 모든 행을 결합
 SELECT 
 	A.CODE, A.VAL,
 	B.CODE, B.UNIT
 FROM A 
 INNER JOIN B 
-ON A.CODE = B.CODE;
+ON A.CODE != B.CODE;
 
 --3.
 SELECT 
@@ -91,11 +118,11 @@ ALTER TABLE STUDENT ADD MAJOR_NO VARCHAR2(3);
 
 --학생 테이블에 학과 번호 업데이트
 UPDATE STUDENT
-SET MAJOR_NO = (SELECT MAJOR_NO FROM MAJOR WHERE MAJOR_NAME = STD_MAJOR);
+SET MAJOR_NO = (SELECT MAJOR_NO FROM MAJOR WHERE MAJOR_NAME = STD_MAJOR); -- STD_MAJOR에 있는값  MAJOR_NO에 넣기
 
 SELECT * FROM STUDENT;
 
--- 학생 테이블에서 학과명 컬럼
+-- 학생 테이블에서 학과명 컬럼 삭제
 ALTER TABLE STUDENT DROP COLUMN MAJOR_NAME;
 
 -- 학생 정보 조회시
@@ -114,3 +141,268 @@ ORDER BY S.MAJOR_NO ASC;
 SELECT 
 	*
 FROM STUDENT S NATURAL JOIN MAJOR M;
+
+-- 제품 정보 조회시
+-- 제품번호, 제품명, 제조사명, 금액
+SELECT 
+	P.PRODUCT_ID,
+	P.PRODUCT_NAME,
+	M.MANUFACTURER_NAME,
+	P.PRICE 
+FROM MANUFACTURERS M 
+JOIN PRODUCTS P 
+ON M.MANUFACTURER_ID = P.MANUFACTURER_ID;
+
+--장학금 테이블
+CREATE TABLE STUDENT_SCHOLARSHIP(
+	SCHOLARSHIP_NO NUMBER,
+	STD_NO CHAR(8),
+	MONEY NUMBER
+);
+
+--장학금 받는 학생 정보만 조회
+SELECT 
+	S.STD_NO,
+	S.STD_NAME,
+	S.STD_SCORE,
+	S.STD_GENDER,
+	SS.MONEY AS "장학금"
+FROM STUDENT S JOIN STUDENT_SCHOLARSHIP SS ON S.STD_NO = SS.STD_NO;
+
+--학번, 이름, 학과명, 평점, 성별, 받은 금액
+SELECT 
+	S.STD_NO,
+	S.STD_NAME,
+	M.MAJOR_NAME,
+	S.STD_SCORE,
+	S.STD_GENDER,
+	SS.MONEY AS "장학금"
+FROM STUDENT S 
+JOIN STUDENT_SCHOLARSHIP SS ON S.STD_NO = SS.STD_NO
+JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO;
+
+--학과 테이블 데이터 2건 추가
+SELECT * FROM MAJOR;
+
+INSERT INTO MAJOR VALUES('A9', '국어국문학과');
+INSERT INTO MAJOR VALUES('B2', '생활체육학과');
+
+--외부 조인(Outter Join)
+--조인 조건에 맞지 않는 행도 결과에 포함 시킬때 사용하는 조인
+--LEFT OUTER
+--왼쪽 테이블의 모든 행을 반환하고, 오른쪽 테이블과 일치하지 않는 데이터는 NULL로 반환합니다.
+SELECT
+	A.*,
+	B.*
+FROM A LEFT OUTER JOIN B ON A.CODE = B.CODE;
+
+--RIGHT OUTER
+--오른쪽 테이블의 모든 행을 반환하고, 왼쪽 테이블과 일치하지 않는 데이터는 NULL로 반환합니다.
+SELECT
+	A.*,
+	B.*
+FROM A RIGHT OUTER JOIN B ON A.CODE = B.CODE;
+
+--FULL OUTER
+--두 테이블의 모든 행을 반환합니다. 일치하는 행은 결합하고, 일치하지 않는 행은 NULL로 표시합니다.
+SELECT
+	A.*,
+	B.*
+FROM A FULL OUTER JOIN B ON A.CODE = B.CODE;
+
+
+--학생 정보 출력시 학생테이블, 학과테이블에 있는 모든 데이터 조회
+--모든컬럼 조회, 연결되지 않는 학과도 전부 조회
+SELECT 
+	S.*,
+	M.*
+FROM STUDENT S
+RIGHT OUTER JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO;
+
+-- 학생이 한명도 없는 학과를 조회 (불일치 쿼리)
+-- 상품관리 한달간 안팔린 상품 조회할때 사용 하기도 가능
+SELECT 
+	M.*,
+	S.STD_NO 
+FROM STUDENT S
+RIGHT OUTER JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO
+WHERE S.STD_NO IS NULL;
+
+--장학금을 받지 못한 학생들의 정보 조회
+SELECT 
+	S.*,
+	SS.MONEY
+FROM STUDENT S
+LEFT OUTER JOIN STUDENT_SCHOLARSHIP SS
+ON S.STD_NO = SS.STD_NO
+WHERE SS.STD_NO IS NULL;
+--위에 학과명도 추가해서 조회
+SELECT 
+	S.STD_NO, S.STD_NAME, S.STD_SCORE, S.STD_GENDER, 
+	M.MAJOR_NAME,
+	SS.MONEY 
+FROM STUDENT S
+LEFT OUTER JOIN STUDENT_SCHOLARSHIP SS
+ON S.STD_NO = SS.STD_NO
+JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO 
+WHERE SS.STD_NO IS NULL;
+
+-- 학과별로 장학금을 받은 학생들의 학과별, 성별을 기준으로 인원수, 최대 평점, 최저 평점
+SELECT 
+	M.MAJOR_NAME,
+	S.STD_GENDER,
+	COUNT(*) AS "인원수",
+	MAX(S.STD_SCORE) AS "최대평점",
+	MIN(S.STD_SCORE) AS "최저평점"
+FROM STUDENT S JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO 
+JOIN STUDENT_SCHOLARSHIP SS ON S.STD_NO = SS.STD_NO 
+GROUP BY M.MAJOR_NAME, S.STD_GENDER; 
+
+-- 학과별로 장학금을 못받은 학생들 숫자를 조회
+--학과명, 학생수만 출력
+SELECT 
+	M.MAJOR_NAME,
+	COUNT(*)
+FROM STUDENT S JOIN MAJOR M ON S.MAJOR_NO = M.MAJOR_NO 
+LEFT JOIN STUDENT_SCHOLARSHIP SS ON S.STD_NO = SS.STD_NO 
+WHERE SS.STD_NO IS NULL
+GROUP BY M.MAJOR_NAME;
+
+-- 랜덤(RANDOM) 
+-- 제조사 코드 형식 AA-0-000
+SELECT DBMS_RANDOM.STRING('X', 2) || '-' || -- 알파벳 두글자 랜덤
+	TRUNC(DBMS_RANDOM.VALUE(0, 10),0) || '-' || -- 0부터 9까지 랜덤
+	TRUNC(DBMS_RANDOM.VALUE(100, 1000),0) -- 100 부터 999까지 랜덤
+FROM DUAL;
+
+--자동차 판매 테이블
+CREATE TABLE CAR_SELL(
+	CAR_SELL_NO NUMBER PRIMARY KEY,
+	CAR_ID VARCHAR2(10),
+	CAR_SELL_EA NUMBER(3),
+	CAR_SELL_PRICE NUMBER(10),
+	CAR_SELL_DATE DATE DEFAULT SYSDATE
+);
+
+SELECT * FROM CAR_SELL;
+
+DROP TABLE CAR_SELL;
+
+-- 자동차 제조사만 조회 - 중복된 내용 제거
+SELECT DISTINCT CAR_MAKER FROM CAR;
+
+-- 자동차 제조사 코드, 자동차 제조사명
+SELECT DBMS_RANDOM.STRING('X', 2) || '-' || -- 알파벳 두글자 랜덤
+	TRUNC(DBMS_RANDOM.VALUE(0, 10),0) || '-' || -- 0부터 9까지 랜덤
+	TRUNC(DBMS_RANDOM.VALUE(100, 1000),0) -- 100 부터 999까지 랜덤
+	AS CAR_MAKER_CODE, CAR_MAKER AS CAR_MAKER_NAME
+FROM (SELECT DISTINCT CAR_MAKER FROM CAR);
+
+-- 자동차 제조사 테이블 생성
+CREATE TABLE CAR_MAKER
+AS
+SELECT DBMS_RANDOM.STRING('X', 2) || '-' || -- 알파벳 두글자 랜덤
+	TRUNC(DBMS_RANDOM.VALUE(0, 10),0) || '-' || -- 0부터 9까지 랜덤
+	TRUNC(DBMS_RANDOM.VALUE(100, 1000),0) -- 100 부터 999까지 랜덤
+	AS CAR_MAKER_CODE, CAR_MAKER AS CAR_MAKER_NAME
+FROM (SELECT DISTINCT CAR_MAKER FROM CAR);
+
+SELECT * FROM CAR_MAKER;
+
+DROP TABLE CAR_MAKER;
+
+-- 자동차 테이블에 제조사 코드 컬럼 추가
+ALTER TABLE CAR ADD CAR_MAKER_CODE VARCHAR2(10);
+
+-- 자동차 테이블에 제조사 코드 컬럼 수정
+UPDATE CAR C SET C.CAR_MAKER_CODE = 
+(SELECT CM.CAR_MAKER_CODE 
+	FROM CAR_MAKER CM 
+	WHERE C.CAR_MAKER = CM.CAR_MAKER_NAME); --
+
+-- 자동차 테이블에 제조사명 컬럼을 삭제
+ALTER TABLE CAR DROP COLUMN CAR_MAKER;
+
+-- 자동차 정보 조회시 자동차 번호, 자동차 모델명, 제조사명, 제조년도, 금액 조회
+SELECT 
+	C.CAR_ID ,
+	C.CAR_NAME ,
+	CM.CAR_MAKER_NAME ,
+	C.CAR_MAKE_YEAR ,
+	C.CAR_PRICE 
+FROM CAR C 
+JOIN CAR_MAKER CM ON C.CAR_MAKER_CODE = CM.CAR_MAKER_CODE;
+
+-- 자동차 제조사별 자동차 제품 개수, 평균가, 최고가, 최소가 조회
+SELECT
+	CM.CAR_MAKER_NAME AS "브랜드명",
+	COUNT(*) AS "개수",
+	TRUNC(AVG(C.CAR_PRICE),2) AS "평균가",
+	MAX(C.CAR_PRICE) AS "최고가",
+	MIN(C.CAR_PRICE) AS "최소가" 
+FROM CAR C 
+JOIN CAR_MAKER CM ON C.CAR_MAKER_CODE = CM.CAR_MAKER_CODE
+GROUP BY CM.CAR_MAKER_NAME;
+
+--자동차 제조사별,제조연도별 출시된 제품 개수 조회
+--단, 금액이 10,000 이상인 것들만 대상으로 잡음
+SELECT 
+	CM.CAR_MAKER_NAME ,
+	C.CAR_MAKE_YEAR,
+	COUNT(C.CAR_MAKE_YEAR) 
+FROM CAR C JOIN CAR_MAKER CM ON C.CAR_MAKER_CODE = CM.CAR_MAKER_CODE
+WHERE C.CAR_PRICE > 30000
+GROUP BY CM.CAR_MAKER_NAME ,C.CAR_MAKE_YEAR;
+
+--자동차 판매 정보 조회
+-- 판매번호, 판매된 모델명, 판매일, 판매개수, 판매금액
+SELECT 
+	CS.CAR_SELL_NO,
+	C.CAR_NAME ,
+	CS.CAR_SELL_DATE ,
+	CS.CAR_SELL_EA ,
+	CS.CAR_SELL_PRICE 
+FROM CAR C JOIN CAR_SELL CS ON C.CAR_ID = CS.CAR_ID;
+
+--한번도 판매되지 않은 자동차 목록 조회
+-- 자동차 번호, 자동차 모델명, 제조사명, 제조년도, 금액
+SELECT 
+	C.CAR_ID ,
+	C.CAR_NAME ,
+	CM.CAR_MAKER_NAME ,
+	C.CAR_MAKE_YEAR ,
+	C.CAR_PRICE
+FROM CAR C LEFT JOIN CAR_SELL CS ON C.CAR_ID = CS.CAR_ID
+JOIN CAR_MAKER CM ON C.CAR_MAKER_CODE = CM.CAR_MAKER_CODE
+WHERE CS.CAR_ID IS NULL;
+
+--판매 연도별, 제조사별, 판매 대수 총합, 판매금액 총합, 판매금액 평균을 조회
+SELECT 
+	TO_CHAR(CS.CAR_SELL_DATE ,'YYYY') AS "판매연도",
+	CM.CAR_MAKER_NAME AS "제조사",
+	COUNT(*) AS "판매총합",
+	SUM(CS.CAR_SELL_PRICE) AS "판매금액총합",
+	TRUNC(AVG(CS.CAR_SELL_PRICE),0) AS "판매금액평균"
+FROM CAR C JOIN CAR_MAKER CM ON C.CAR_MAKER_CODE = CM.CAR_MAKER_CODE
+JOIN CAR_SELL CS ON C.CAR_ID = CS.CAR_ID 
+GROUP BY TO_CHAR(CS.CAR_SELL_DATE ,'YYYY') , CM.CAR_MAKER_NAME ;
+
+-- 판매 연도/월별, 제조사별, 판매 대수 총합, 판매금액 총합, 판매금액 평균을 조회
+SELECT
+	TO_CHAR(CS.CAR_SELL_DATE ,'YYYY/MM'),
+	CM.CAR_MAKER_NAME ,
+	SUM(CS.CAR_SELL_EA),
+	SUM(CS.CAR_SELL_PRICE),
+	TRUNC(AVG(CS.CAR_SELL_PRICE),0) 
+FROM CAR C JOIN CAR_MAKER CM ON C.CAR_MAKER_CODE = CM.CAR_MAKER_CODE 
+JOIN CAR_SELL CS ON C.CAR_ID = CS.CAR_ID
+GROUP BY TO_CHAR(CS.CAR_SELL_DATE ,'YYYY/MM') , CM.CAR_MAKER_NAME ;
+
+-- 판매 연도/분기, 판매 대수 총합, 판매금액 총합, 판매금액 평균을 조회
+SELECT 
+	TO_CHAR(CS.CAR_SELL_DATE,'YYYY"년"/Q"분기"') AS "판매 연도/분기",
+	SUM(CS.CAR_SELL_EA) AS "판매총합",
+	SUM(CS.CAR_SELL_PRICE) AS "판매금액총합",
+	TRUNC(AVG(CS.CAR_SELL_PRICE),0) AS "판매금액 평균" 
+FROM CAR_SELL CS 
+GROUP BY TO_CHAR(CS.CAR_SELL_DATE,'YYYY"년"/Q"분기"'),CS.CAR_SELL_EA, CS.CAR_SELL_PRICE;
