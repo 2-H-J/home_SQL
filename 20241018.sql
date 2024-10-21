@@ -33,13 +33,15 @@ INSERT INTO PERSON VALUES('0004','박길동',50);
 --ALTER TABLE 테이블명 ADD CONSTRAINT 제약조건명
 --FOREIGN KEY(외래키 지정할 컬럼명) --노비
 --REFERENCES 외래키로 연결될 테이블명(참조할 테이블의 기본키); -- 주인
---[ON DELETE CASCADE]  |   [ON DELETE RESTRICT]  |  [ON DELETE SET NULL] -- [] : 옵션
+--[ON DELETE CASCADE]  |   [ON DELETE RESTRICT]  |  [ON DELETE SET NULL] -> [] : 옵션
 --     같이 삭제	   |		 같이 멈춤       |  연결된 PK가 사라지면 참조연결을 제거
 -- 만약 위 옵션중 설정을 하지 않으면 기본값이 ON DELETE RESTRICT로 설정됨
 CREATE TABLE PERSON_ORDER(
 	P_ORDER_NO NUMBER(5), --PRIMARY KEY,
 	P_ORDER_MEMO VARCHAR2(300),
-	PID CHAR(4)
+	PID CHAR(4)--,
+--	CONSTRAINTS PERSON_ORDER_PID_FK FOREIGN KEY(PID) REFERENCES PERSON(PID);
+	-- 위와 같이 테이블 생성중 제약조건등록 가능
 );
 
 DROP TABLE PERSON_ORDER;
