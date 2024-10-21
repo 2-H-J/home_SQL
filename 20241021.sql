@@ -140,6 +140,27 @@ FROM
 DROP SEQUENCE SEQ_ORDER_NO;
 
 
+-- SEQUENCE 예제 테스트
+--1. SEQUENCE 생성
+CREATE SEQUENCE SEQ_TEST_NO
+START WITH 1 -- 시작 값
+MAXVALUE 9999 -- 최대 값
+MINVALUE 1 -- 최소 값
+INCREMENT BY 1 -- 증가 값
+CACHE 10 -- 메모리 미리 생성
+NOCYCLE; --사이클(반복) NOCYCLE 사이클안함 CYCLE 사이클함
+
+CREATE TABLE SEQ_TEST(
+	SEQ_NO NUMBER PRIMARY KEY,
+	SEQ_NAME VARCHAR2(30)
+);
+
+INSERT INTO SEQ_TEST VALUES(SEQ_TEST_NO.NEXTVAL,'테스트1'); -- INSERT 문 하나로 편하게 등록 가능
+
+SELECT * FROM SEQ_TEST;
+ROLLBACK; -- ROLLBACK 을 해도 SEQUENCE값은 롤백 되지 않음
+DROP SEQUENCE SEQ_TEST_NO; -- SEQUENCE 를 삭제해도 기존 들어간 값은 있음
+
 --VIEW(뷰)
 --SQL에 하나의 이상의 테이블의 조회 결과를 저장한 "가상" 테이블 그래서 스토리지 용량(물리적공간)을 사용안한다.
 --실제 데이터를 저장하지 않고, 쿼리의 결과를 미리 정의해 두어 필요할 때 재사용 할 수도 있다.
