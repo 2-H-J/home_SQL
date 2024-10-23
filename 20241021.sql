@@ -181,7 +181,7 @@ CREATE OR REPLACE VIEW 뷰이름 AS ( OR REPLACE : 뷰를 수정하려면 CREATE
 --VIEW 뷰 생성 권한 C##SCOTT에 부여
 GRANT CREATE VIEW TO C##SCOTT;
 
---모든 관리자 권한
+--모든 관리자 권한 부여
 --GRANT DBA TO 사용자명;
 
 --학생 정보 조회, 학번, 이름, 학과명, 평점, 성별 조회하는 조회문 작성
@@ -257,6 +257,7 @@ JOIN STUDENT_SCHOLARSHIP SS ON
 	S.STD_NO = SS.STD_NO
 ORDER BY
 	SS.SCHOLARSHIP_NO ASC;
+
 --VIEW 생성
 CREATE OR REPLACE
 VIEW STUDENT_SCHOLARSHIP_VIEW AS
