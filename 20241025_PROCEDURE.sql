@@ -57,6 +57,7 @@ EXCEPTION
 		DBMS_OUTPUT.PUT_LINE('ERROR'); -- 오류 발생 시 메시지 출력
 		ROLLBACK; -- 오류 발생 시 트랜잭션을 롤백하여 DB 상태 복구
 END;
+
 ----------------------------------------------------------------------------------------
 /* GPT개선 PROCEDURE_EX2
 트랜잭션 제어는 불필요하게 COMMIT 및 ROLLBACK을 포함하는 대신, INSERT의 성공 여부에 따라 처리됩니다.
@@ -87,8 +88,9 @@ END;
 ----------------------------------------------------------------------------------------
 -- 프로시저 호출 및 실행
 BEGIN
-	PROCEDURE_EX2('0005','이씨', 20); -- 매개변수를 입력하여 PROCEDURE_EX2 실행
+	PROCEDURE_EX2('0006','이씨', 20); -- 매개변수를 입력하여 PROCEDURE_EX2 실행
 END;
+
 SELECT * FROM PERSON; -- 결과 확인을 위해 PERSON 테이블의 모든 레코드를 조회
 ----------------------------------------------------------------------------------------
 -- 값을 외부로 전달하는 프로시저 생성
@@ -119,6 +121,35 @@ EXCEPTION
 		DBMS_OUTPUT.PUT_LINE('숫자는 0보다 커야합니다.'); -- 예외 발생 시 메시지 출력
 		RESULT := -1; -- 예외 발생 시 RESULT에 -1 할당
 END;
+----------------------------------------------------------------------------------------
+/* GPT개선 PROCEDURE_EX3
+표준 예외 처리: RAISE_APPLICATION_ERROR로 시스템 예외 사용.
+팩토리얼 최적화: 루프를 2부터 시작해 불필요한 연산 제거.
+구체적 에러 출력: SQLERRM으로 예외 메시지 명확히 출력. */
+CREATE OR REPLACE PROCEDURE PROCEDURE_EX3(
+	NUM IN NUMBER,         -- 입력으로 받는 숫자
+	RESULT OUT NUMBER      -- 팩토리얼 결과를 외부로 반환하는 매개변수
+)
+IS
+BEGIN
+	-- 예외 조건 확인
+	IF NUM <= 0 THEN
+		RAISE_APPLICATION_ERROR(-20001, '숫자는 0보다 커야 합니다.'); -- 시스템 예외로 처리
+	END IF;
+
+	-- 팩토리얼 계산
+	RESULT := 1;
+	FOR I IN 2 .. NUM LOOP       -- 2부터 시작하여 성능 개선
+		RESULT := RESULT * I;    -- RESULT에 결과값 누적
+	END LOOP;
+
+EXCEPTION
+	WHEN OTHERS THEN
+		DBMS_OUTPUT.PUT_LINE(SQLERRM); -- 발생한 에러 메시지 출력
+		RESULT := -1;                 -- 예외 발생 시 RESULT에 -1 할당
+END;
+
+
 ----------------------------------------------------------------------------------------
 -- 프로시저 호출 및 출력
 DECLARE
