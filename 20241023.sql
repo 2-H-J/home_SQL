@@ -205,6 +205,4 @@ JOIN BOARD_CONTENT_HATE BCH ON B.BNO = BCH.BNO
 GROUP BY BM.ID;
 
 --게시글을 작성한 회원들의 게시글 개수, 좋아요를 받은 총 횟수, 싫어요를 받은 총 횟수를 조회 전체
-SELECT 
-	
-FROM 
+
