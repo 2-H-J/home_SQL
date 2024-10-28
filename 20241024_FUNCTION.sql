@@ -69,12 +69,16 @@ RETURN VARCHAR2
 IS 
     MSG VARCHAR2(100);
     USER_EXCEPTION EXCEPTION;  -- 사용자 정의 예외 선언
+    ZERO_EXCEPTION EXCEPTION; 
     
 BEGIN 
     -- 점수가 음수일 경우 예외 발생
     IF SCORE < 0 THEN
-        RAISE USER_EXCEPTION;
+        RAISE ZERO_EXCEPTION; -- 0미만 EXCEPTION
+    ELSIF SCORE > 100 THEN
+    	RAISE USER_EXCEPTION; -- 100이상 EXCEPTION
     END IF;
+   
     
     -- 점수에 따른 등급 처리
     IF SCORE >= 90 THEN
@@ -93,8 +97,12 @@ BEGIN
     
 EXCEPTION
     -- 사용자 정의 예외 처리
-    WHEN USER_EXCEPTION THEN
+    WHEN ZERO_EXCEPTION THEN
         RETURN '점수는 0이상 입력해야 합니다.';
+       
+    WHEN USER_EXCEPTION THEN
+    	RETURN '점수는 100이 최대 입니다.';
+    	
     -- 기타 예외 처리
     WHEN OTHERS THEN
         RETURN '알 수 없는 에러 발생';
@@ -107,7 +115,8 @@ SELECT
 	GET_SCORE_GRADE(75) AS GRADE_3,
 	GET_SCORE_GRADE(85) AS GRADE_4,
 	GET_SCORE_GRADE(95) AS GRADE_5,
-	GET_SCORE_GRADE(-95) AS GRADE_6
+	GET_SCORE_GRADE(-95) AS GRADE_6,
+	GET_SCORE_GRADE(101) AS GRADE_7
 FROM DUAL;
 
 DROP FUNCTION GET_SCORE_GRADE;
@@ -219,21 +228,20 @@ END;
 
 SELECT * FROM MAJOR;
 
+ALTER TABLE MAJOR ADD CONSTRAINT PK_MAJOR_NO PRIMARY KEY (MAJOR_NO); -- MAJOR_NO 기본키
+
 UPDATE MAJOR SET MAJOR_NAME = '디지털문화콘텐츠학과'
-WHERE MAJOR_NO = 'A9';
+WHERE MAJOR_NO = 'C9';
 DROP TRIGGER UPDATE_MAJOR_LOG;
 ---------------------------------------------------------------------------------------------
 
 -- 트리거 생성 또는 기존 트리거 대체
 CREATE OR REPLACE TRIGGER INSERT_MAJOR_TRIGGER
-
 -- INSERT 작업 후 트리거가 실행됨
 AFTER 
     INSERT ON MAJOR  -- MAJOR 테이블에서 INSERT 작업이 일어날 때
-
 -- 각 행마다 트리거가 실행됨
 FOR EACH ROW
-
 -- 트리거 본문 시작
 BEGIN
     -- DATA_LOG 테이블에 로그 삽입
@@ -246,6 +254,7 @@ END;  -- 트리거 끝
 -- 새로운 학과 번호 'C9'와 학과 이름 '게임학과'를 삽입
 -- 이 INSERT 문이 실행되면, 트리거가 작동하여 DATA_LOG 테이블에 로그가 기록됨
 INSERT INTO MAJOR VALUES('C9','게임학과');
+DELETE MAJOR WHERE MAJOR_NO = 'C9';
 
 -- DATA_LOG 테이블에 삽입된 로그 데이터를 조회하는 SELECT 문
 -- 트리거 실행 후 기록된 로그를 확인하기 위해 사용
@@ -314,6 +323,8 @@ DELETE FROM MAJOR WHERE MAJOR_NO = 'C9';
 
 -- DATA_LOG 테이블의 모든 데이터를 조회하여 로그 확인
 SELECT * FROM DATA_LOG;
+SELECT * FROM MAJOR;
+
 
 
 -- 현재 세션에서 접속한 사용자의 정보를 조회하는 SQL 구문
@@ -323,6 +334,7 @@ SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') FROM DUAL;
 -- CREATE USER 사용자명 IDENTIFIED BY 비밀번호;
 -- 권한 부여 : GRANT RESOURCE, CONNECT TO 사용자명;
 -- ALTER USER 사용자명 DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+
 -- "가져올계정"의 INSERT, UPDATE, DELETE, SELECT 권한을 "사용할계정"에 주는법 DROP같은 다른 권한은X
 -- 다른 권한을 추가 할 수있다.
 -- GRANT INSERT, UPDATE, DELETE, SELECT ON C##SCOTT.MAJOR TO C##USER; 
@@ -332,8 +344,8 @@ GRANT RESOURCE, CONNECT TO C##USER;
 
 ALTER USER C##USER DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
 
--- C##SCOTT의 INSERT, UPDATE, DELETE, SELECT 권한을 C##USER 주는법 DROP같은 다른 권한은X
-GRANT INSERT, UPDATE, DELETE, SELECT ON C##SCOTT.MAJOR TO C##USER; 
+-- C##SCOTT의 MAJOR 테이블만 INSERT, UPDATE, DELETE, SELECT 권한을 C##USER 에 주는법 DROP같은 다른 권한은X
+GRANT INSERT, UPDATE, DELETE, SELECT ON C##SCOTT.MAJOR TO C##USER;
 
 
 -- MAJOR 테이블에 대해 INSERT, UPDATE, DELETE 작업이 발생할 때마다 실행되는 트리거
@@ -370,17 +382,17 @@ END;  -- 트리거 끝
 
 DROP TRIGGER MAJOR_TRIGGER;
 
-SELECT * FROM MAJOR;
+SELECT * FROM C##SCOTT.MAJOR;
 
 -- MAJOR 테이블에 학과 번호 'C9'와 학과 이름 '게임학과'를 삽입
 INSERT INTO C##SCOTT.MAJOR VALUES('C9', '게임학과');
 
 -- MAJOR 테이블에서 학과 번호 'C9'의 학과 이름을 '디지털문화콘텐츠학과'로 수정
-UPDATE MAJOR SET MAJOR_NAME = '디지털문화콘텐츠학과'
+UPDATE C##SCOTT.MAJOR SET MAJOR_NAME = '디지털문화콘텐츠학과'
 WHERE MAJOR_NO = 'C9';
 
 -- MAJOR 테이블에서 학과 번호 'C9'인 데이터를 삭제
-DELETE FROM MAJOR WHERE MAJOR_NO = 'C9';
+DELETE FROM C##SCOTT.MAJOR WHERE MAJOR_NO = 'C9';
 
 -- DATA_LOG 테이블의 모든 데이터를 조회하여 로그 확인
 SELECT * FROM DATA_LOG;
