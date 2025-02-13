@@ -178,7 +178,9 @@ MINVALUE 1
 MAXVALUE 999999999;
 --CYCLE
 --CACHE 10;
+CREATE SEQUENCE SEQ_BOARD_FILE_FNO;
 
+DROP SEQUENCE seq_board_file_pno;
 ------------------------------------------------------------------------------------------
 -- 4. 샘플 데이터 저장 (샘플 데이터 저장용 쿼리 작성 가능)
 --암호화방법 (19버전 이후 부터)
